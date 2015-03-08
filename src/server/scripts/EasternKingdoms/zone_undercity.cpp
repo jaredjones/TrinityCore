@@ -44,15 +44,15 @@ enum Sylvanas
     EMOTE_LAMENT_END            = 0,
     SAY_LAMENT_END              = 1,
     EMOTE_LAMENT                = 2,
-    
+
     SOUND_CREDIT                = 10896,
     ENTRY_HIGHBORNE_LAMENTER    = 21628,
     ENTRY_HIGHBORNE_BUNNY       = 21641,
-    
+
     SPELL_HIGHBORNE_AURA        = 37090,
     SPELL_SYLVANAS_CAST         = 36568,
     SPELL_RIBBON_OF_SOULS       = 37099,
-    
+
     // Combat spells
     SPELL_BLACK_ARROW           = 59712,
     SPELL_FADE                  = 20672,
@@ -84,7 +84,7 @@ class npc_lady_sylvanas_windrunner : public CreatureScript
 {
 public:
     npc_lady_sylvanas_windrunner() : CreatureScript("npc_lady_sylvanas_windrunner") { }
-    
+
     bool OnQuestReward(Player* player, Creature* creature, const Quest *_Quest, uint32 /*slot*/) override
     {
         if (_Quest->GetQuestId() == QUEST_JOURNEY_TO_UNDERCITY)
@@ -93,44 +93,44 @@ public:
             ENSURE_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->DoPlaySoundToSet(creature, SOUND_CREDIT);
             ENSURE_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->_player = player;
             creature->CastSpell(creature, SPELL_SYLVANAS_CAST, false);
-            
+
             creature->AI()->Talk(EMOTE_LAMENT);
-            
+
             for (uint8 i = 0; i < 4; ++i)
                 creature->SummonCreature(ENTRY_HIGHBORNE_LAMENTER, HighborneLoc[i][0], HighborneLoc[i][1], HIGHBORNE_LOC_Y, HighborneLoc[i][2], TEMPSUMMON_TIMED_DESPAWN, 160000);
         }
         return true;
     }
-    
+
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_lady_sylvanas_windrunnerAI(creature);
     }
-    
+
     struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
     {
         npc_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature)
         {
             Initialize();
         }
-        
+
         void Initialize()
         {
             LamentEventTimer = 5000;
             LamentEvent = false;
             targetGUID.Clear();
-            
+
             FadeTimer = 30000;
             SummonSkeletonTimer = 20000;
             BlackArrowTimer = 15000;
             ShotTimer = 8000;
             MultiShotTimer = 10000;
         }
-        
+
         uint32 LamentEventTimer;
         bool LamentEvent;
         ObjectGuid targetGUID;
-        
+
         uint32 FadeTimer;
         uint32 SummonSkeletonTimer;
         uint32 BlackArrowTimer;
@@ -138,16 +138,16 @@ public:
         uint32 MultiShotTimer;
         bool flag;
         Player *_player;
-        
+
         void Reset() override
         {
             Initialize();
             flag = false;
             _player = nullptr;
         }
-        
+
         void EnterCombat(Unit* /*who*/) override { }
-        
+
         void JustSummoned(Creature* summoned) override
         {
             if (summoned->GetEntry() == ENTRY_HIGHBORNE_BUNNY)
@@ -162,7 +162,7 @@ public:
                 targetGUID = summoned->GetGUID();
             }
         }
-        
+
         void UpdateAI(uint32 diff) override
         {
             if (LamentEvent)
@@ -189,12 +189,12 @@ public:
                 }
                 else LamentEventTimer -= diff;
             }
-            
+
             if (!UpdateVictim())
                 return;
-            
+
             // Combat spells
-            
+
             if (FadeTimer <= diff)
             {
                 DoCast(me, SPELL_FADE);
@@ -207,14 +207,14 @@ public:
                         DoCast(victim, SPELL_MULTI_SHOT);
             }
             else FadeTimer -= diff;
-            
+
             if (SummonSkeletonTimer <= diff)
             {
                 DoCast(me, SPELL_SUMMON_SKELETON);
                 SummonSkeletonTimer = 20000 + rand32() % 10000;
             }
             else SummonSkeletonTimer -= diff;
-            
+
             if (BlackArrowTimer <= diff)
             {
                 if (Unit* victim = me->GetVictim())
@@ -224,7 +224,7 @@ public:
                 }
             }
             else BlackArrowTimer -= diff;
-            
+
             if (ShotTimer <= diff)
             {
                 if (Unit* victim = me->GetVictim())
@@ -234,7 +234,7 @@ public:
                 }
             }
             else ShotTimer -= diff;
-            
+
             if (MultiShotTimer <= diff)
             {
                 if (Unit* victim = me->GetVictim())
@@ -244,7 +244,7 @@ public:
                 }
             }
             else MultiShotTimer -= diff;
-            
+
             DoMeleeAttackIfReady();
         }
     };
@@ -258,7 +258,7 @@ class npc_ambassador_sunsorrow : public CreatureScript
 {
 public:
     npc_ambassador_sunsorrow() : CreatureScript("npc_ambassador_sunsorrow")  {}
-    
+
     bool OnGossipHello(Player* player, Creature* creature)
     {
         if (player->GetQuestStatus(QUEST_JOURNEY_TO_UNDERCITY) == QUEST_STATUS_REWARDED )
@@ -270,7 +270,7 @@ public:
         }
         return true;
     }
-    
+
     bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {
         switch (sender)
@@ -286,12 +286,12 @@ public:
         }
         return true;
     }
-    
+
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_ambassador_sunsorrowAI(creature);
     }
-    
+
     struct npc_ambassador_sunsorrowAI : public ScriptedAI
     {
         npc_ambassador_sunsorrowAI(Creature* creature) : ScriptedAI(creature) { }
@@ -306,21 +306,21 @@ class npc_highborne_lamenter : public CreatureScript
 {
 public:
     npc_highborne_lamenter() : CreatureScript("npc_highborne_lamenter") { }
-    
+
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_highborne_lamenterAI(creature);
     }
-    
+
     struct npc_highborne_lamenterAI : public ScriptedAI
     {
         npc_highborne_lamenterAI(Creature* creature) : ScriptedAI(creature) { }
-        
+
         uint32 EventMoveTimer;
         uint32 EventCastTimer;
         bool EventMove;
         bool EventCast;
-        
+
         void Reset() override
         {
             EventMoveTimer = 100;
@@ -328,9 +328,9 @@ public:
             EventMove = true;
             EventCast = true;
         }
-        
+
         void EnterCombat(Unit* /*who*/) override { }
-        
+
         void UpdateAI(uint32 diff) override
         {
             if (EventMove)
@@ -374,7 +374,7 @@ class npc_parqual_fintallas : public CreatureScript
 {
 public:
     npc_parqual_fintallas() : CreatureScript("npc_parqual_fintallas") { }
-    
+
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
         player->PlayerTalkClass->ClearMenus();
@@ -390,12 +390,12 @@ public:
         }
         return true;
     }
-    
+
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
-        
+
         if (player->GetQuestStatus(6628) == QUEST_STATUS_INCOMPLETE && !player->HasAura(SPELL_MARK_OF_SHAME))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HPF1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -405,7 +405,7 @@ public:
         }
         else
             player->SEND_GOSSIP_MENU(5821, creature->GetGUID());
-        
+
         return true;
     }
 };
